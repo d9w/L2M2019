@@ -5,7 +5,7 @@ from pyCGP.evaluator import Evaluator
 
 from osim.env import L2M2019Env
 import numpy as np
-from utils import *
+from pyCGP.utils import *
 
 class L2MEvaluator(Evaluator):
     def __init__(self, it_max, ep_max):
@@ -16,13 +16,14 @@ class L2MEvaluator(Evaluator):
 
     def evaluate(self, cgp, it):
         np.random.seed(it)
+        fit = 0
         for e in range(self.ep_max):
             # resetting env
             obs = self.env.reset()
 
             done = False
-            fit = 0
-            while not done:
+            it = 0
+            while (not done) and (it < self.it_max):
                 # parsing inputs
                 inputs = np.zeros(41)
                 inputs[0] =  change_interval(obs['pelvis']['height'], self.env.observation_space.low[242], self.env.observation_space.high[242], -1, 1)
@@ -69,27 +70,19 @@ class L2MEvaluator(Evaluator):
                 inputs[39] =  change_interval(obs['l_leg']['SOL']['f'], self.env.observation_space.low[333], self.env.observation_space.high[333], -1, 1)
                 inputs[40] =  change_interval(obs['l_leg']['TA']['f'], self.env.observation_space.low[336], self.env.observation_space.high[336], -1, 1)
 
+                outputs = cgp.run(inputs)
 
-                pelvis = list(flatten(obs["pelvis"].values()))
+                for i in range(len(outputs)):
+                    outputs[i] = change_interval(outputs[i], -1, 1, self.env.action_space.low[i], self.env.action_space.high[i])
 
-                r_leg = obs["r_leg"]["ground_reaction_forces"]
-                r_leg += list(obs["r_leg"]["joint"].values())
-                for x in ['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA']:
-                    r_leg += [obs['r_leg'][x]['f']]
-
-                l_leg = obs["l_leg"]["ground_reaction_forces"]
-                l_leg += list(obs["l_leg"]["joint"].values())
-                for x in ['HAB', 'HAD', 'HFL', 'GLU', 'HAM', 'RF', 'VAS', 'BFSH', 'GAS', 'SOL', 'TA']:
-                    l_leg += [obs['l_leg'][x]['f']]
-
-                inputs = pelvis + r_leg + l_leg
-
-                print(inputs)
-
-
-                #building inputs
-
+                print(inputs + ' ===> ' + outputs)
 
                 obs, reward, done, info = self.env.step(self.env.action_space.sample())
 
+                fit += reward
+                it += 1
 
+        return fit
+
+    def clone(self):
+        return L2MEvaluator(self.it_max, self.ep_max)
