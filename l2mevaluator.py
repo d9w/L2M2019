@@ -75,7 +75,7 @@ class L2MEvaluator(Evaluator):
                 for i in range(len(outputs)):
                     outputs[i] = change_interval(outputs[i], -1, 1, self.env.action_space.low[i], self.env.action_space.high[i])
 
-                print(inputs + ' ===> ' + outputs)
+                print(str(inputs) + ' ===> ' + str(outputs))
 
                 obs, reward, done, info = self.env.step(self.env.action_space.sample())
 
