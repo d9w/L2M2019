@@ -8,6 +8,9 @@ import numpy as np
 from pyCGP.utils import *
 
 class L2MEvaluator(Evaluator):
+    num_inputs = 43
+    num_outputs = 22
+
     def __init__(self, it_max, ep_max):
         super().__init__()
         self.it_max = it_max
@@ -25,7 +28,7 @@ class L2MEvaluator(Evaluator):
             it = 0
             while (not done) and (it < self.it_max):
                 # parsing inputs
-                inputs = np.zeros(41)
+                inputs = np.zeros(self.num_inputs)
                 inputs[0] =  change_interval(obs['pelvis']['height'], self.env.observation_space.low[242], self.env.observation_space.high[242], -1, 1)
                 inputs[1] =  change_interval(obs['pelvis']['pitch'], self.env.observation_space.low[243], self.env.observation_space.high[243], -1, 1)
                 inputs[2] =  change_interval(obs['pelvis']['roll'], self.env.observation_space.low[244], self.env.observation_space.high[244], -1, 1)
@@ -70,17 +73,21 @@ class L2MEvaluator(Evaluator):
                 inputs[39] =  change_interval(obs['l_leg']['SOL']['f'], self.env.observation_space.low[333], self.env.observation_space.high[333], -1, 1)
                 inputs[40] =  change_interval(obs['l_leg']['TA']['f'], self.env.observation_space.low[336], self.env.observation_space.high[336], -1, 1)
 
+                inputs[41] = change_interval(sum(sum(obs['v_tgt_field'][0])), 121.0 * self.env.observation_space.low[0], 121.0 * self.env.observation_space.high[0], -1, 1)
+                inputs[42] = change_interval(sum(sum(obs['v_tgt_field'][1])), 121.0 * self.env.observation_space.low[0], 121.0 * self.env.observation_space.high[0], -1, 1)
+
                 outputs = cgp.run(inputs)
 
                 for i in range(len(outputs)):
                     outputs[i] = change_interval(outputs[i], -1, 1, self.env.action_space.low[i], self.env.action_space.high[i])
 
-                print(str(inputs) + ' ===> ' + str(outputs))
+                #print(str(inputs) + ' ===> ' + str(outputs))
 
                 obs, reward, done, info = self.env.step(self.env.action_space.sample())
 
                 fit += reward
                 it += 1
+        print(str(cgp.genome) + ' ===> ' + fit)
 
         return fit
 
