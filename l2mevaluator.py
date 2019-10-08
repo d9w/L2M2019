@@ -87,7 +87,7 @@ class L2MEvaluator(Evaluator):
 
                 fit += reward
                 it += 1
-        print(str(cgp.genome) + ' ===> ' + fit)
+        print(str(cgp.genome) + ' ===> ' + str(fit))
 
         return fit
 

@@ -1,3 +1,6 @@
+import os
+import sys
+
 from pyCGP.cgpes import CGPES
 from pyCGP.cgp import CGP
 from pyCGP.cgpfunctions import *
@@ -35,5 +38,5 @@ if __name__ == '__main__':
     library = build_funcLib()
     e = L2MEvaluator(it_max=1000, ep_max=1)
     cgpFather = CGP.random(num_inputs=e.num_inputs, num_outputs=e.num_outputs, num_cols=100, num_rows=1, library=library, recurrency_distance=1.0, recursive=False)
-    es = CGPES(num_offsprings=5, mutation_rate_nodes=0.1, mutation_rate_outputs=0.3, father=cgpFather, evaluator=e, folder='evo_test', num_cpus=1)
-    es.run(num_iteration=50)
+    es = CGPES(num_offsprings=5, mutation_rate_nodes=0.1, mutation_rate_outputs=0.3, father=cgpFather, evaluator=e, folder=sys.argv[1], num_cpus=1)
+    es.run(num_iteration=100000)
