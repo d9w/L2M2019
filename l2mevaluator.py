@@ -15,7 +15,7 @@ class L2MEvaluator(Evaluator):
         super().__init__()
         self.it_max = it_max
         self.ep_max = ep_max
-        self.env = L2M2019Env(visualize=False)
+        self.env = L2M2019Env(visualize=False, difficulty=3)
 #        self.obs_high = np.array(self.env.observation_space.high)
 #        self.obs_low = np.array(self.env.observation_space.low)
         self.stop_measure = 0
